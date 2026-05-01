@@ -9,12 +9,13 @@ import fakeig from './fakeig.mjs';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const port = process.env.PORT || 3000;
+const isVercel = Boolean(process.env.VERCEL);
 
 // Setting limit 50mb karena file gambar Base64 ukurannya bisa lumayan besar
 app.use(bodyparser.json({ limit: '50mb' }));
 
-// Jadikan folder 'public' sebagai tempat file index.html (frontend web)
-app.use(express.static('public'));
+// Serve static assets dari root project (index.html ada di root)
+app.use(express.static('.'));
 
 // Endpoint API untuk memanggil script fakeig.mjs
 app.post('/api/generate', async (req, res) => {
@@ -43,7 +44,11 @@ app.post('/api/generate', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
-    console.log(`🚀 StoryGen Backend running at http://localhost:${port}`);
-    console.log(`Buka browser dan arahkan ke http://localhost:${port}`);
-});
+if (!isVercel) {
+    app.listen(port, () => {
+        console.log(`🚀 StoryGen Backend running at http://localhost:${port}`);
+        console.log(`Buka browser dan arahkan ke http://localhost:${port}`);
+    });
+}
+
+export default app;
