@@ -1,26 +1,38 @@
 import { Canvas, loadImage, FontLibrary } from 'skia-canvas'
 import fs from 'fs'
 import { fileURLToPath } from 'url'
+import path from 'path'
+import os from 'os'
 
-async function ensureFile(url, path) {
-  if (!fs.existsSync(path)) {
-    const res = await fetch(url)
-    const buf = Buffer.from(await res.arrayBuffer())
-    fs.writeFileSync(path, buf)
+async function ensureFile(url, filePath) {
+  if (fs.existsSync(filePath)) return
+
+  const res = await fetch(url)
+  if (!res.ok) {
+    throw new Error(`Failed to fetch asset: ${url} (${res.status})`)
   }
+
+  const buf = Buffer.from(await res.arrayBuffer())
+  fs.writeFileSync(filePath, buf)
 }
 
 async function generate(pp, name, text) {
-  if (!fs.existsSync('./font')) fs.mkdirSync('./font')
+  const tmpDir = os.tmpdir()
+  const fontDir = path.join(tmpDir, 'font')
+  const bgPath = path.join(tmpDir, 'bg-template.jpg')
+  const fontSBPath = path.join(fontDir, 'Inter-SemiBold.otf')
+  const fontBPath = path.join(fontDir, 'Inter-Bold.otf')
 
-  await ensureFile('https://raw.githubusercontent.com/Ditzzx-vibecoder/Assets/main/Font/Inter-SemiBold.otf', './font/Inter-SemiBold.otf')
-  await ensureFile('https://raw.githubusercontent.com/Ditzzx-vibecoder/Assets/main/Font/Inter-Bold.otf', './font/Inter-Bold.otf')
-  await ensureFile('https://raw.githubusercontent.com/Ditzzx-vibecoder/Assets/main/Image/_20260430144912806.jpg', './bg-template.jpg')
+  if (!fs.existsSync(fontDir)) fs.mkdirSync(fontDir, { recursive: true })
 
-  FontLibrary.use('Inter-SB', ['./font/Inter-SemiBold.otf'])
-  FontLibrary.use('Inter-B', ['./font/Inter-Bold.otf'])
+  await ensureFile('https://raw.githubusercontent.com/Ditzzx-vibecoder/Assets/main/Font/Inter-SemiBold.otf', fontSBPath)
+  await ensureFile('https://raw.githubusercontent.com/Ditzzx-vibecoder/Assets/main/Font/Inter-Bold.otf', fontBPath)
+  await ensureFile('https://raw.githubusercontent.com/Ditzzx-vibecoder/Assets/main/Image/_20260430144912806.jpg', bgPath)
 
-  let bg = await loadImage('./bg-template.jpg')
+  FontLibrary.use('Inter-SB', [fontSBPath])
+  FontLibrary.use('Inter-B', [fontBPath])
+
+  let bg = await loadImage(bgPath)
   let avatar = await loadImage(pp)
 
   let canvas = new Canvas(bg.width, bg.height)
