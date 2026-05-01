@@ -1,6 +1,5 @@
 {
   "version": 2,
-  "outputDirectory": "public",
   "builds": [
     {
       "src": "server.mjs",
@@ -11,6 +10,10 @@
     {
       "src": "/api/(.*)",
       "dest": "server.mjs"
+    },
+    {
+      "src": "/",
+      "dest": "/index.html"
     },
     {
       "src": "/(.*)",
