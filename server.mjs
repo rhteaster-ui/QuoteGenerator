@@ -14,8 +14,8 @@ const isVercel = Boolean(process.env.VERCEL);
 // Setting limit 50mb karena file gambar Base64 ukurannya bisa lumayan besar
 app.use(bodyparser.json({ limit: '50mb' }));
 
-// Jadikan folder 'public' sebagai tempat file index.html (frontend web)
-app.use(express.static('public'));
+// Serve static assets dari root project (index.html ada di root)
+app.use(express.static('.'));
 
 // Endpoint API untuk memanggil script fakeig.mjs
 app.post('/api/generate', async (req, res) => {
